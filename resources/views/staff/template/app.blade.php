@@ -427,7 +427,7 @@
 
                 <!-- Dropdown Menu -->
                 <div class="dropdown-menu" id="dropdownMenu">
-                    <a href="{{ route('profile') }}" class="dropdown-item">
+                    <a href="{{ route('user.profile',Auth::user()->id) }}" class="dropdown-item">
                         <i class="fas fa-user"></i>
                         <span>Profil Saya</span>
                     </a>

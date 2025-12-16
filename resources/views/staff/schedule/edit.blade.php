@@ -61,7 +61,7 @@
     <div class="container">
         <div class="card mt-5">
             <div class="card-header">
-                <h1>Edit ScheduleController</h1>
+                <h1>Edit Jadwal Lapangan</h1>
             </div>
             <div class="card-body">
                 <form method="POST" action="{{ Route('staff.schedules.update', $schedule->id) }}">

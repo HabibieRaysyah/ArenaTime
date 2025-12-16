@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ScheduleExport;
 use App\Models\field;
 use App\Models\schedule;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ScheduleController extends Controller
 {
@@ -81,7 +83,7 @@ class ScheduleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, schedule $schedule,$id)
+    public function update(Request $request, schedule $schedule, $id)
     {
         $request->validate([
             'hours.*' =>   'required',
@@ -91,23 +93,63 @@ class ScheduleController extends Controller
             'price_hourly.required' => 'Harga harus diisi!!'
         ]);
 
-        $updateData = Schedule::where('id',$id)->update([
+        $updateData = Schedule::where('id', $id)->update([
             'hour' => array_unique($request->hour),
             'hourly_price' => $request->price_hourly,
         ]);
 
-        if($updateData){
-            return redirect()->route('staff.schedules.index')->with('success',"Berhasil Mengupdate Data!!");
-        }else{
-            return redirect()->back()->with('failed',"Gagal Mengupdate Data!!");
+        if ($updateData) {
+            return redirect()->route('staff.schedules.index')->with('success', "Berhasil Mengupdate Data!!");
+        } else {
+            return redirect()->back()->with('failed', "Gagal Mengupdate Data!!");
         }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(schedule $schedule)
+    public function destroy(schedule $schedule, $id)
     {
-        //
+        $deleteData = Schedule::where('id', $id)->delete();
+
+        if ($deleteData) {
+            return redirect()->back()->with('success', 'Berhasil menghapus data');
+        } else {
+            return redirect()->back()->with('error', 'Gagal menghapus data');
+        }
+    }
+
+    public function export() {
+        $tableName = 'data-jadwal.xlsx';
+        return Excel::download(new ScheduleExport, $tableName);
+    }
+
+
+    public function trash()
+    {
+        $schedules = schedule::onlyTrashed()->get();
+        return view('staff.schedule.trash', compact('schedules'));
+    }
+
+    public function restore($id)
+    {
+        $restore = schedule::onlyTrashed()->where('id', $id)->restore();
+
+        if ($restore) {
+            return redirect()->back()->with('success', 'Berhasil mengembalikan data');
+        } else {
+            return redirect()->back()->with('error', 'Gagal mengembalikan data');
+        }
+    }
+
+    public function deletepermanent($id)
+    {
+        $deletPermanentData = schedule::onlyTrashed()->where('id', $id)->forceDelete();
+
+        if ($deletPermanentData) {
+            return redirect()->back()->with('success', 'Berhasil menghapus data permanent');
+        } else {
+            return redirect()->back()->with('error', 'Gagal menghapus data');
+        }
     }
 }

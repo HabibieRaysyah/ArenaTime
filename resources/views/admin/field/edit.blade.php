@@ -76,7 +76,7 @@
             <div class="card-header">
                 <div class="d-flex">
                     <i class="fas fa-users" style="font-size: 45px;margin-right: 20px"></i>
-                    <h1>Edit Staff</h1>
+                    <h1 >Edit Lapangan</h1>
                 </div>
             </div>
             <div class="card-body">

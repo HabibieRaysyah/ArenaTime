@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil Saya - ArenaTime.id</title>
+    {{-- Jquery --}}
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
@@ -689,6 +691,8 @@
             border-radius: 2px;
         }
     </style>
+    @stack('style')
+
 </head>
 
 <body>
@@ -709,7 +713,7 @@
                     <div class="menu-title">Akun Saya</div>
                     <ul class="menu-items">
                         <li class="menu-item">
-                            <a href="#" class="menu-link active">
+                            <a href="{{ route('user.profile', Auth::user()->id) }}" class="menu-link active">
                                 <i class="fas fa-user"></i>
                                 <span>Profil Saya</span>
                             </a>
@@ -727,9 +731,9 @@
                             </a>
                         </li>
                         <li class="menu-item">
-                            <a href="#" class="menu-link">
+                            <a href="{{ route('user.booking-user.index') }}" class="menu-link">
                                 <i class="fas fa-credit-card"></i>
-                                <span>Pembayaran</span>
+                                <span>Booking</span>
                             </a>
                         </li>
                     </ul>
@@ -742,7 +746,6 @@
             <!-- Header -->
             <header class="header">
                 <div class="header-left">
-                    <h1>Dashboard Admin</h1>
                 </div>
                 <div class="header-right">
                     <!-- Notification Bell -->
@@ -764,7 +767,7 @@
 
                         <!-- Dropdown Menu -->
                         <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="{{ route('profile') }}" class="dropdown-item">
+                            <a href="{{ route('user.profile',Auth::user()->id) }}" class="dropdown-item">
                                 <i class="fas fa-user"></i>
                                 <span>Profil Saya</span>
                             </a>
@@ -795,202 +798,7 @@
                 </div>
             </header>
 
-
-            <!-- Content -->
-            <div class="content">
-                <!-- Profile Header -->
-                <div class="profile-header">
-                    <div class="profile-info">
-                        <div class="profile-avatar">
-                            <i class="fas fa-user"></i>
-                            <div class="avatar-edit">
-                                <i class="fas fa-camera"></i>
-                            </div>
-                        </div>
-                        <div class="profile-details">
-                            <h2>{{ Auth::user()->name }}</h2>
-                            <p>Member sejak Januari 2023 • {{ Auth::user()->role }}</p>
-                            <div class="profile-stats">
-                                <div class="stat-item">
-                                    <span class="stat-value">24</span>
-                                    <span class="stat-label">Total Booking</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value">18</span>
-                                    <span class="stat-label">Berhasil</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value">4.8</span>
-                                    <span class="stat-label">Rating</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Profile Content -->
-                <div class="profile-content">
-                    <!-- Informasi Pribadi -->
-                    <div class="profile-card">
-                        <div class="card-header">
-                            <h3 class="card-title">Informasi Pribadi</h3>
-                            <button class="btn-edit ms-3" onclick="toggleEdit('personalInfo')">
-                                <i class="fas fa-edit me-2"></i>Edit
-                            </button>
-                        </div>
-                        <form id="personalInfoForm" method="POST" action="{{ route('user.update.profile',Auth::user()->id) }}">
-                            @csrf
-                            @method('put')
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Nama Lengkap</label>
-                                    <input name="name" class="form-control" value="{{ Auth::user()->name }}"
-                                        disabled>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Umur</label>
-                                    <input name="age" class="form-control" value="{{ Auth::user()->age ?? '-' }}"
-                                        disabled>
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Email</label>
-                                    <input type="email" name="email" class="form-control" value="{{ Auth::user()->email }}"
-                                        disabled>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Nomor Telepon</label>
-                                    <input type="tel" name="number" class="form-control" value="{{ Auth::user()->number_phone ?? '-' }}" disabled>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Alamat</label>
-                                <textarea class="form-control" name="address" rows="3" disabled>{{ Auth::user()->address ?? '-' }}</textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary" disabled>Submit</button>
-                        </form>
-                    </div>
-
-                    <!-- Aktivitas Terbaru -->
-                    <div class="profile-card">
-                        <div class="card-header">
-                            <h3 class="card-title">Aktivitas Terbaru</h3>
-                        </div>
-                        <ul class="activity-list">
-                            @foreach ($activityLogs as $activity)
-                                <li class="activity-item">
-                                    <div class="activity-icon booking">
-                                        <i class="fas fa-calendar-check"></i>
-                                    </div>
-                                    <div class="activity-content">
-                                        <div class="activity-text">{{ $activity->description }}</div>
-                                        <div class="activity-time">{{$activity->created_at->diffForHumans()}}</div>
-                                    </div>
-                                </li>                                                                                                                                                                                                                                               
-                            @endforeach
-                        </ul>
-                    </div>
-
-                    <!-- Preferensi Olahraga -->
-                    <div class="profile-card">
-                        <div class="card-header">
-                            <h3 class="card-title">Preferensi Olahraga</h3>
-                            <button class="btn-edit" onclick="toggleEdit('sportsPref')">
-                                <i class="fas fa-edit me-2"></i>Edit
-                            </button>
-                        </div>
-                        <form id="sportsPrefForm" method="POST" action="">
-                            @csrf
-                            <div class="form-group">
-                                <label class="form-label">Olahraga Favorit</label>
-                                <div
-                                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
-                                    <label style="display: flex; align-items: center; gap: 8px;">
-                                        <input type="checkbox" name="sports" value="badminton" checked disabled>
-                                        Badminton
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 8px;">
-                                        <input type="checkbox" name="sports" value="futsal" checked disabled> Futsal
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 8px;">
-                                        <input type="checkbox" name="sports" value="basket" disabled> Basket
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 8px;">
-                                        <input type="checkbox" name="sports" value="tennis" disabled> Tennis
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Level Kemampuan</label>
-                                <select class="form-control" disabled>
-                                    <option selected>Menengah</option>
-                                    <option>Pemula</option>
-                                    <option>Lanjutan</option>
-                                    <option>Profesional</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Waktu Olahraga Favorit</label>
-                                <select class="form-control" disabled>
-                                    <option selected>Sore (16:00 - 19:00)</option>
-                                    <option>Pagi (06:00 - 09:00)</option>
-                                    <option>Siang (10:00 - 13:00)</option>
-                                    <option>Malam (19:00 - 22:00)</option>
-                                </select>
-                            </div>
-                        </form>
-                    </div>
-
-                    <!-- Pencapaian & Badges -->
-                    <div class="profile-card">
-                        <div class="card-header">
-                            <h3 class="card-title">Pencapaian Saya</h3>
-                        </div>
-                        <div class="badges-section">
-                            <div class="badges-grid">
-                                <div class="badge-item">
-                                    <div class="badge-icon">
-                                        <i class="fas fa-calendar-check"></i>
-                                    </div>
-                                    <div class="badge-name">Booking Pertama</div>
-                                </div>
-                                <div class="badge-item">
-                                    <div class="badge-icon">
-                                        <i class="fas fa-star"></i>
-                                    </div>
-                                    <div class="badge-name">Reviewer Aktif</div>
-                                </div>
-                                <div class="badge-item">
-                                    <div class="badge-icon">
-                                        <i class="fas fa-bolt"></i>
-                                    </div>
-                                    <div class="badge-name">Early Bird</div>
-                                </div>
-                                <div class="badge-item">
-                                    <div class="badge-icon">
-                                        <i class="fas fa-crown"></i>
-                                    </div>
-                                    <div class="badge-name">Member Premium</div>
-                                </div>
-                                <div class="badge-item">
-                                    <div class="badge-icon">
-                                        <i class="fas fa-users"></i>
-                                    </div>
-                                    <div class="badge-name">Team Player</div>
-                                </div>
-                                <div class="badge-item">
-                                    <div class="badge-icon">
-                                        <i class="fas fa-trophy"></i>
-                                    </div>
-                                    <div class="badge-name">Loyal Member</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            @yield('content')
         </main>
     </div>
 
@@ -1016,15 +824,15 @@
             alert('Fitur upload foto profil akan segera tersedia!');
         });
 
-        // Menu item active state
-        const menuItems = document.querySelectorAll('.menu-link');
-        menuItems.forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                menuItems.forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
+        // // Menu item active state
+        // const menuItems = document.querySelectorAll('.menu-link');
+        // menuItems.forEach(item => {
+        //     item.addEventListener('click', function(e) {
+        //         e.preventDefault();
+        //         menuItems.forEach(i => i.classList.remove('active'));
+        //         this.classList.add('active');
+        //     });
+        // });
 
         // Dropdown functionality
         const userMenu = document.getElementById('userMenu');
@@ -1087,6 +895,8 @@
             }
         });
     </script>
+    @stack('script')
+
 </body>
 
 </html>

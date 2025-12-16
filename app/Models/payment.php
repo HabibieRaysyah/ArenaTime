@@ -10,12 +10,13 @@ class payment extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'Oder_id',
+        'Order_id',
         'booking_id',
         'user_id',
         'metode',
         'amount',
         'status',
+        'link_payment',
         'payment_date',
     ];
 

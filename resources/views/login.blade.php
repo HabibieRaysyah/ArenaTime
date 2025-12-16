@@ -632,7 +632,7 @@
                             {{ Session::get('success') }}
                         </div>
                     @endif
-                    @if (Session::get('failed'))
+                    @if (Session::get('error'))
                         <div class="alert alert-error">
                             <i class="fas fa-exclamation-triangle"></i>
                             {{ Session::get('error') }}

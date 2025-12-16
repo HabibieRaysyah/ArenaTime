@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\booking;
-use App\Models\Booking as ModelsBooking;
 use App\Models\payment;
 use GuzzleHttp\Promise\Create;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Symfony\Component\VarDumper\Caster\PdoCaster;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 use function Symfony\Component\Clock\now;
 
@@ -24,7 +24,7 @@ class PaymentController extends Controller
 
     public function payment($id)
     {
-        $booking = Booking::find($id)->with(['schedule','schedule.field'])->latest()->first();
+        $booking = Booking::find($id)->with(['schedule', 'schedule.field'])->latest()->first();
         // dd($booking);
         return view("fieldDetail.payment", compact('booking'));
     }
@@ -90,22 +90,84 @@ class PaymentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, $id)
     {
+        $booking = Booking::with(['user', 'schedule'])->findOrFail($id);
 
-        $createData = payment::create([
-            'booking_id' => $request->booking_id,
-            'user_id' => $request->user_id,
-            'Oder_id' => $request->Oder_id,
-            'metode' => $request->metode,
-            'amount' => $request->amount,
-            'payment_date' => now(),
-            'status' => 'belum',
-        ]);
+        // Buat order_id yang unik
+        $orderId = 'ORDER-' . $booking->id . '-' . time();
 
-        return response()->json(['message' => 'Berhasil membuat barcode pembayaran', 'data' => $createData]);
+        $payment = Payment::updateOrCreate(
+            ['booking_id' => $booking->id],
+            [
+                'user_id' => Auth::user()->id,
+                'Order_id' => $orderId,
+                'amount' => (int) $booking->price,
+                'payment_date' => now(),
+            ]
+        );
+
+        // Midtrans config
+        \Midtrans\Config::$serverKey = config('midtrans.server_key');
+        \Midtrans\Config::$isProduction = false;
+        \Midtrans\Config::$isSanitized = true;
+        \Midtrans\Config::$is3ds = true;
+
+        $params = [
+            'transaction_details' => [
+                'order_id' => $payment->Order_id,
+                'gross_amount' => (int) $payment->amount,
+            ],
+            'customer_details' => [
+                'first_name' => $booking->user->name,
+                'email' => $booking->user->email,
+            ],
+        ];
+
+        try {
+            $snapToken = \Midtrans\Snap::getSnapToken($params);
+
+            $payment->snap_token = $snapToken;
+            $payment->save();
+
+            return redirect()->route('user.booking-user.checkout', $payment->id);
+        } catch (\Exception $e) {
+            Log::error('Midtrans Error: ' . $e->getMessage());
+            return back()->with('error', 'Gagal membuat pembayaran: ' . $e->getMessage());
+        }
     }
 
+    // ✅ PERBAIKAN: Hapus parameter ganda & logic yang tidak perlu
+    public function checkout($id)
+    {
+        $payment = Payment::findOrFail($id);
+
+        // Pastikan snap_token ada
+        if (!$payment->snap_token) {
+            return redirect()->route('user.booking-user.index')
+                ->with('error', 'Token pembayaran tidak ditemukan');
+        }
+
+        return view('profile.checkout', compact('payment'));
+    }
+
+    public function success($id)
+    {
+        $data = payment::where('id', $id)->update([
+            'status' => 'lunas',
+        ]);
+
+        return redirect()->route('user.booking-user.index');
+    }
+
+    public function cancel($id)
+    {
+        $data = booking::where('id', $id)->update([
+            'status' => 'cancelled',
+        ]);
+
+        return redirect()->route('user.booking-user.index');
+    }
     /**
      * Display the specified resource.
      */

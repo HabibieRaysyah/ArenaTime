@@ -410,11 +410,11 @@
     <div class="page-header">
         <h2 class="page-title">Data Lapangan</h2>
         <div class="page-actions">
-            <a href="{{ route('admin.fields.export') }}" class="btn btn-outline">
+            <a href="{{ route('staff.schedules.export') }}" class="btn btn-outline">
                 <i class="fas fa-download"></i>
                 Export
             </a>
-            <a href="{{ route('admin.fields.trash') }}" class="btn btn-recyle">
+            <a href="{{ route('staff.schedules.trash') }}" class="btn btn-recyle">
                 <i class="fas fa-trash"></i>
                 Recylebin
             </a>
@@ -424,7 +424,18 @@
             </button>
         </div>
     </div>
-
+    @if (Session::get('success'))
+        <div class="alert alert-success">
+            <i class="fas fa-trophy"></i>
+            {{ Session::get('success') }}
+        </div>
+    @endif
+    @if (Session::get('failed'))
+        <div class="alert alert-error">
+            <i class="fas fa-exclamation-triangle"></i>
+            {{ Session::get('failed') }}
+        </div>
+    @endif
     <!-- Table Container -->
     <div class="table-container">
         <div class="table-header">
@@ -453,7 +464,7 @@
             </thead>
             <tbody>
                 @forelse ($schedules as $index => $schedule)
-                {{-- @php
+                    {{-- @php
                     dd($schedule)
                 @endphp --}}
                     <tr>
@@ -629,10 +640,10 @@
             let content = `
                         <img src="${image}" width="120" class="d-block mx-auto my-2 img-thumbnail img-thumbnail">
                         <ul>
-                            <li>Name : ${schedule.field.name}</li>
-                            <li>Vision : ${schedule.field.type}</li>
-                            <li>Mision : ${schedule.field.status}</li>
-                            <li>Jadwal : ${schedule.price},</li>
+                            <li>Name Lapangan : ${schedule.field.name}</li>
+                            <li>Type : ${schedule.field.type}</li>
+                            <li>Status : ${schedule.field.status}</li>
+                            <li>Harga Perjam : ${schedule.hourly_price},</li>
                             <li>Description  : ${schedule.field.description}</li>
                         </ul>
                         `;

@@ -22,8 +22,8 @@ class UserController extends Controller
     }
 
     public function profile(){
-        $activityLogs = Activity::where('causer_id', Auth::user()->id)->with('causer')->latest()->get();
-        return view('profile.profile',compact('activityLogs'));
+        $activityLogs = Activity::where('causer_id', Auth::user()->id)->with('causer')->latest()->limit(5)->get();
+        return view('profile.profile_section',compact('activityLogs'));
     }
 
     public function updateprofile(Request $request,$id){
@@ -254,9 +254,9 @@ class UserController extends Controller
     public function deletepermanent($id)
     {
         $user = User::onlyTrashed()->find($id);
-        $deleteperma = $user->forceDelete();
+        $deleteperma = $user->where('id', $id)->forceDelete();
         if ($deleteperma) {
-            return redirect()->back() > with('success', 'Berhasil Menghapus Permanent Data!!');
+            return redirect()->back()->with('success', 'Berhasil Menghapus Permanent Data!!');
         } else {
             return redirect()->back()->with('failed', 'Gagal Menghapus Permanent Data!!');
         }

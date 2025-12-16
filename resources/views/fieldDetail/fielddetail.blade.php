@@ -445,7 +445,7 @@
     <!-- Hero Section -->
     <section class="court-hero">
         <div class="court-gallery">
-            <img src="{{ asset('storage/'. $schedule->field->picture) }}" class="main-image" alt="Lapangan Badminton Pro"
+            <img src="{{ asset('storage/' . $schedule->field->picture) }}" class="main-image" alt="Lapangan Badminton Pro"
                 id="mainImage">
         </div>
     </section>
@@ -623,7 +623,7 @@
                             <div class="price-period">per jam</div>
                         </div>
 
-                        <form id="bookingForm" action="{{ route('user.booking.store',$schedule->id) }}" method="POST">
+                        <form id="bookingForm" action="{{ route('user.booking.store', $schedule->id) }}" method="POST">
                             @csrf
                             <div class="mb-4">
                                 <label class="form-label fw-bold">Pilih Tanggal</label>
@@ -636,7 +636,7 @@
                                     <select name="hours" class="form-select" id="">
                                         <option selected disabled hidden>--Pilih main jam berapa--</option>
                                         @foreach ($schedule->hour as $hour)
-                                            <option value="{{$hour }}">{{ $hour }}</option>
+                                            <option value="{{ $hour }}">{{ $hour }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -780,7 +780,7 @@
             `;
         }
 
-        document.getElementById('duration').addEventListener('change', 2);
+        document.getElementById('duration').addEventListener('change', updateBookingSummary);
 
         // Star rating functionality
         const stars = document.querySelectorAll('.star');
@@ -863,4 +863,14 @@
             alert('Ulasan berhasil ditambahkan! Terima kasih atas ulasan Anda.');
         });
     </script>
+    @if (Session::get('success'))
+        <script>
+            Swal.fire({
+                title: "{{ session('success') }}",
+                icon: "success",
+                draggable: true
+            });
+        </script>
+    @endif
+
 @endpush

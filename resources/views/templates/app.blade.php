@@ -461,7 +461,7 @@
 
                             <!-- Dropdown Menu -->
                             <div class="dropdown-menu" id="dropdownMenu">
-                                <a href="{{ route('profile',Auth::user()->id) }}" class="dropdown-item">
+                                <a href="{{ route('user.profile',Auth::user()->id) }}" class="dropdown-item">
                                     <i class="fas fa-user"></i>
                                     <span>Profil Saya</span>
                                 </a>
@@ -564,6 +564,7 @@
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- MDB -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/9.2.0/mdb.umd.min.js"></script>
     <script>

@@ -169,11 +169,6 @@
             color: var(--error);
         }
 
-        .status-warning {
-            background: rgba(239, 71, 111, 0.1);
-            color: var(--accent);
-        }
-
         .action-buttons {
             display: flex;
             gap: 8px;
@@ -415,13 +410,24 @@
     <div class="page-header">
         <h2 class="page-title">Data Lapangan</h2>
         <div class="page-actions">
-            <a href="{{ route('admin.fields.export') }}" class="btn btn-outline">
-                <i class="fas fa-download"></i>
-                Export
+            <a href="{{ route('staff.schedules.index') }}" class="btn btn-outline">
+                <i class="fa-solid fa-arrow-left"></i>
+                Kembali
             </a>
         </div>
     </div>
-
+    @if (Session::get('success'))
+        <div class="alert alert-success">
+            <i class="fas fa-trophy"></i>
+            {{ Session::get('success') }}
+        </div>
+    @endif
+    @if (Session::get('failed'))
+        <div class="alert alert-error">
+            <i class="fas fa-exclamation-triangle"></i>
+            {{ Session::get('failed') }}
+        </div>
+    @endif
     <!-- Table Container -->
     <div class="table-container">
         <div class="table-header">
@@ -442,51 +448,44 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>Nama User</th>
                     <th>Nama Lapangan</th>
-                    <th>status</th>
-                    <th>Total</th>
-                    <th>Date</th>
+                    <th>HargaPerjam</th>
+                    <th>Jadwal</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse ($bookings as $index => $booking)
+                @forelse ($schedules as $index => $schedule)
+                    {{-- @php
+                    dd($schedule)
+                @endphp --}}
                     <tr>
 
-                        <td>{{ $booking->user->name ?? '-' }}</td>
+                        <td>{{ $schedule->field->name ?? '-' }}</td>
+                        <td><span class="status-badge status-active">{{ $schedule->hourly_price }}</span></td>
                         <td>
-                            {{ $booking->schedule->field->name ?? '-' }}
-                        </td>
-                        <td>
-                            @if ($booking->status == 'pending')
-                                <span class="status-badge status-warning">{{ $booking->status ?? '-' }}</span>
-                            @else
-                                <span class="status-badge status-active">{{ $booking->status ?? '-' }}</span>
-                            @endif
-
-                        </td>
-
-                        <td>
-                            Rp. {{ number_format($booking->price, 0, ',', '.') ?? '-' }}
-                        </td>
-                        <td>
-                            {{ $booking->booking_date }}
+                            <ul>
+                                @foreach ($schedule->hour as $hour)
+                                    <li>{{ $hour }}</li>
+                                @endforeach
+                            </ul>
                         </td>
                         <td>
                             <div class="action-buttons">
-                                @if ($booking->status == 'pending')
-                                    <form action="{{ route('staff.bookings.approve', $booking->id) }}" method="POST">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button class="btn btn-primary" type="submit">
-                                            Confirmed
-                                        </button>
-                                    </form>
-                                @else
-                                    <span class="status-badge status-active">Selesai</span>
-                                @endif
-
+                                <form action="{{ route('staff.schedules.restore', $schedule->id) }}" method="POST">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button class="btn-action btn-search" type="submit">
+                                        <i class="fa-solid fa-trash-can-arrow-up"></i>
+                                    </button>
+                                </form>
+                                <form action="{{ route('staff.schedules.deletepermanent', $schedule->id) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn-action btn-delete" type="submit">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -517,7 +516,7 @@
     </main>
     </div>
 
-    <!-- Modal Form -->
+    {{-- <!-- Modal Form -->
     <div class="modal" id="formModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -535,6 +534,9 @@
                             <select type="text" class="form-control" placeholder="Isi nama Lengkap di sini"
                                 name="field_id" value="{{ old('field_id') }}">
                                 <option disabled selected hidden>Pilih Lapangan</option>
+                                @foreach ($fields as $field)
+                                    <option value="{{ $field->id }}">{{ $field->name }}</option>
+                                @endforeach
 
                             </select>
                             @error('field_id')
@@ -579,9 +581,9 @@
                 </form>
             </div>
         </div>
-    </div>
+    </div> --}}
 
-    <!-- Modal Detail -->
+    {{-- <!-- Modal Detail -->
     <div class="modal fade" id="modalDetail" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -597,68 +599,5 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 @endsection
-
-@push('script')
-    <script>
-        function addInput() {
-            let content = `
-                                <input type="time" class="form-control mt-3" placeholder="Isi nama Lengkap di sini"
-                                    name="hours[]" value="{{ old('hours[]') }}">
-            `
-            let wrap = document.querySelector('#addtionalInput');
-            wrap.innerHTML += content;
-
-        }
-        // Modal Functions
-        function openModal() {
-            document.getElementById('formModal').classList.add('show');
-            document.getElementById('modalTitle').textContent = 'Tambah Lapangan Baru';
-        }
-
-        function closeModal() {
-            document.getElementById('formModal').classList.remove('show');
-        }
-
-
-
-        function showModal(schedule) {
-            // mengambil image dengan fungsi php
-            let image = "{{ asset('storage/') }}" + "/" + schedule.field.picture;
-            // cosole.log(it)
-            // backtip (``) : menyimpan string yg berbaris -baris, ada enternya
-            let content = `
-                        <img src="${image}" width="120" class="d-block mx-auto my-2 img-thumbnail img-thumbnail">
-                        <ul>
-                            <li>Name : ${schedule.field.name}</li>
-                            <li>Vision : ${schedule.field.type}</li>
-                            <li>Mision : ${schedule.field.status}</li>
-                            <li>Jadwal : ${schedule.price},</li>
-                            <li>Description  : ${schedule.field.description}</li>
-                        </ul>
-                        `;
-            console.log(content)
-            // panggil element HTML yang akan diisi konten diatas : document.querySelector()
-            let modalDetailBody = document.querySelector('#modalDetailBody');
-            // isi konten HTML : innerHTML
-            modalDetailBody.innerHTML = content;
-            // panggil element HTML bagian modal
-            let modalDetail = document.querySelector("#modalDetail");
-            // munculkan modal boostrap
-            new mdb.Modal(modalDetail).show();
-
-        }
-
-
-
-        ClassicEditor
-            .create(document.querySelector('#description'))
-            .then(editor => {
-                console.log('Editor siap dipakai!', editor);
-            })
-            .catch(error => {
-                console.error(error);
-            });
-    </script>
-@endpush

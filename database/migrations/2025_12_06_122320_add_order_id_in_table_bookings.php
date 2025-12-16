@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('payments', function (Blueprint $table) {
-            $table->string('Oder_id')->change();
+        Schema::table('bookings', function (Blueprint $table) {
+            $table->string('Order_id')->unique()->change;
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('payments', function (Blueprint $table) {
-            $table->string('Oder_id')->unique()->change();
+        Schema::table('bookings', function (Blueprint $table) {
+            $table->dropColumn('Order_id');
         });
     }
 };
